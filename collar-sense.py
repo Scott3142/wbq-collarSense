@@ -1,29 +1,36 @@
-from flask import Flask
-from sense_hat import SenseHat
+from flask import Flask, flash, redirect, render_template, request, session, abort, jsonify
+import json
 import random
+from gpiozero import Button
+from time import time,sleep
 
 app = Flask(__name__)
 
 @app.route('/')
-def index():
-    
-    sense = SenseHat()
-    sense.clear()
-    
-    o = sense.get_orientation()
-    pitch = o["pitch"]
-    
-    output_choices = ["I'm so hungry!","Take me for a walk!", "I want to sleep now.", "You're the best human ever.", "Can we get a cat?","I don't like the neighbors."]
-    
-    if pitch > 0:
-        output = random.choice(output_choices)
-    else:
-        output = random.choice(output_choices)
-    
-    html = "<a href='#?force=refresh" + str(random.randint(0,10)) + "'>What is my dog saying?</a><p>Woof! "
-    output = html + output + "</p>"
-    
-    return str(output)
+def splash():
+    return render_template('splash.html')
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+@app.route("/holding/")
+def inprogress():
+    return render_template('holding.html')
+
+@app.route("/playing/")
+def game_playing():
+    
+    ### Put code here ###
+
+    output_choices = ["I'm so hungry!","Take me for a walk!", "I want to sleep now.", "You're the best human ever.", "I want to get a cat!","I don't like the neighbors."]
+    
+    #button.wait_for_press()
+    output = random.choice(output_choices)
+
+    ### End code ###
+
+    return jsonify(scores=output)
+
+@app.route("/score/<scoreValue>")
+def score(scoreValue):
+    return render_template('final.html',scoreValue=scoreValue)
+
+if __name__ == "__main__":
+    app.run(debug=True)
